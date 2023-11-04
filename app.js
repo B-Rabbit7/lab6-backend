@@ -8,7 +8,7 @@ const GET = "GET";
 const POST = "POST";
 
 const dictionary = {};
-const search_route = "/search/";
+const search_route = "/definition/";
 const create_route = "/definition";
 const languages_route = "/languages";
 const endpoint_error = "Endpoint not found";
@@ -118,7 +118,7 @@ app.post(create_route, (req, res) => {
 });
 
 app.get(search_route, (req, res) => {
-  const term = req.query.term;
+  const term = req.query.word;
   request += 1;
   if (term in dictionary) {
     res.status(200).json({ result: `${term}: ${dictionary[term]}` });
