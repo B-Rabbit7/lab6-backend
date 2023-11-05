@@ -33,6 +33,10 @@ const successDeleteLanguages = dbConstants.table.successDeleteLanguages;
 const displayLanguagesQuery = dbConstants.table.displayLanguagesQuery;
 const errorDisplayLanguage = dbConstants.table.errorDisplayLanguage;
 const successDisplayLanguage = dbConstants.table.successDisplayLanguage;
+const checkTermQuery = dbConstants.table.checkTermQuery;
+const errorCheckTerm = dbConstants.table.errorCheckTerm;
+const checkDefinitionQuery = dbConstants.table.checkDefinitionQuery;
+const errorCheckDefinition = dbConstants.table.errorCheckDefinition;
 
 
 const pgError = errorConstants.pgError;
@@ -42,6 +46,7 @@ const exists = errorConstants.exists;
 
 const connectedMsg = messageConstants.connected;
 const allDataDisplayedMsg = messageConstants.allDataDisplayed;
+const getResults = messageConstants.getResults;
 
 const availableLanguages = constants.languages;
 
@@ -177,13 +182,13 @@ app.post(create_route, (req, res) => {
   const definitionLanguage = data.definition_language;
   const definition = data.definition;
 
-  const checkTermSql = "SELECT term FROM dictionary WHERE term = $1";
+  const checkTermSql = checkTermQuery;
   con.query(checkTermSql, [term], (err, result) => {
     if (err) {
-      console.error("Error checking term in dictionary:", err);
-      res.status(500).json({ error: exists, request: data });
+      console.error(errorCheckTerm(term), err);
+      res.status(500).json({ error: exists(term), request: data });
     } else if (result.rowCount > 0) {
-      res.status(400).json({ error: exists, request: data });
+      res.status(400).json({ error: exists(term), request: data });
     } else {
       const insertDataSql = insertSql;
       con.query(
@@ -191,8 +196,8 @@ app.post(create_route, (req, res) => {
         [term, termLanguage, definition, definitionLanguage],
         (err, result) => {
           if (err) {
-            console.error("Error inserting data:", err);
-            res.status(500).json({ error: insertError, request: data });
+            console.error(insertError(data), err);
+            res.status(500).json({ error: insertError(data), request: data });
           } else {
             dictionary[term] = definition;
             res.status(201).json({
@@ -210,19 +215,19 @@ app.post(create_route, (req, res) => {
 app.get(routesConstants.mainRoute, (req, res) => {
   requestCounter++;
   const term = req.params.word;
-  const getDefinitionSql = "SELECT definition FROM dictionary WHERE term = $1";
+  const getDefinitionSql = checkDefinitionQuery;
   con.query(getDefinitionSql, [term], (err, result) => {
     if (err) {
-      console.error("Error getting definition:", err);
+      console.error(errorCheckDefinition, err);
       res
         .status(500)
         .json({ error: errorConstants.dictNotFound(term), request: term });
     } else if (result.rowCount > 0) {
-      const definition = result.rows[0].definition;
+      const { definition, term_language, definition_language } = result.rows[0];
       res
         .status(200)
         .json({
-          result: `${term}: ${definition}`,
+          result: getResults(term,definition,term_language,definition_language),
           exists: true,
           request: term,
         });

@@ -8,7 +8,7 @@ module.exports = {
             insert: "INSERT INTO dictionary (term, term_language, definition, definition_language) VALUES ($1, $2, $3, $4)",
             deleteError: "Error deleting rows from the database:",
             deleteSuccess: "All rows deleted from the 'dictionary' table:",
-            insertError: "Error inserting data into the database:",
+            insertError: (data)=> `Error inserting data into the database: ${data}`,
             update: `UPDATE dictionary SET definition = $1, term_language = $2, definition_language = $3 WHERE term = $4`,
             updateError: "Error updating data in the database",
             updateSuccess: (term, newDefinition) => `Term updated:\n"${term} : ${newDefinition}"`,
@@ -25,6 +25,13 @@ module.exports = {
             displayLanguagesQuery: "SELECT * FROM language",
             errorDisplayLanguage: "Error fetching languages from the language table:",
             successDisplayLanguage:"Successfully added Languages to the table. Languages in the 'language' table:" ,
+            checkTermQuery: "SELECT term FROM dictionary WHERE term = $1",
+            errorCheckTerm: (term)=> `Error checking the following term in dictionary: ${term}`,
+            checkDefinitionQuery: "SELECT definition, term_language, definition_language FROM dictionary WHERE term = $1",
+            errorCheckDefinition: (term)=>`Error getting definition for term: ${term} `,
+
+
+
 
 
         },
@@ -33,7 +40,7 @@ module.exports = {
         pgError: "PostgreSQL client error:",
         cantConnect: "Error connecting:",
         fetchError: "Error fetching data:",
-        exists: "Warning, item already exists",
+        exists: (term)=> `Warning, term ${term} already exists`,
         dictNotFound: (term) => `Term "${term}" not found in the database`,
     },
     messages: {
@@ -57,6 +64,13 @@ module.exports = {
       </div>
     `,
         serverUp: (port) => `Server is running on port ${port}`,
+        getResults: (term,definition,term_language,definition_language)=>`
+        <span style="color: blue;"><strong>${term}:</strong></span> 
+        <span style="color: green;">${definition}</span><br>
+        <span style="color: blue;"><strong>Term Language:</strong></span> 
+        <span style="color: red;">${term_language}</span><br>
+        <span style="color: blue;"><strong>Definition Language:</strong></span> 
+        <span style="color: purple;">${definition_language}</span>`,
     },
     languages: [
         "English",
