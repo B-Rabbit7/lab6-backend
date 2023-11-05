@@ -39,6 +39,11 @@ const checkDefinitionQuery = dbConstants.table.checkDefinitionQuery;
 const errorCheckDefinition = dbConstants.table.errorCheckDefinition;
 const update = dbConstants.table.update;
 const updateError = dbConstants.table.updateError;
+const deleteRow = dbConstants.table.deleteRow;
+const deleteRowError = dbConstants.table.deleteRowError;
+const deleteRowSuccess = dbConstants.table.deleteRowSuccess;
+const selectSingleLanguageQuey = dbConstants.table.selectSingleLanguageQuey;
+const errorSelectSingleLanguage = dbConstants.table.errorSelectSingleLanguage;
 
 const pgError = errorConstants.pgError;
 const cantConnect = errorConstants.cantConnect;
@@ -298,10 +303,10 @@ app.delete(routesConstants.mainRoute, (req, res) => {
   requestCounter++;
   const term = req.params.word;
 
-  const deleteDataSql = "DELETE FROM dictionary WHERE term = $1";
+  const deleteDataSql = deleteRow;
   con.query(deleteDataSql, [term], (err, result) => {
     if (err) {
-      console.error("Error deleting data:", err);
+      console.error(deleteRowError, err);
       res
         .status(500)
         .json({ error: errorConstants.dictNotFound(term), request: term });
@@ -310,7 +315,7 @@ app.delete(routesConstants.mainRoute, (req, res) => {
       res
         .status(200)
         .json({
-          result: dbConstants.table.deleteRowSuccess(term),
+          result: deleteRowSuccess(term),
           request: term,
         });
       displayData();
@@ -321,19 +326,23 @@ app.delete(routesConstants.mainRoute, (req, res) => {
     }
   });
 });
+
+
+
 function displayLanguagesFromTable(callback) {
-  const sql = "SELECT name FROM language";
+  const sql = selectSingleLanguageQuey;
 
   con.query(sql, (err, result) => {
     if (err) {
-      console.error("Error fetching languages:", err);
-      callback({ error: "Error fetching languages" });
+      console.error(errorSelectSingleLanguage, err);
+      callback({ error: errorSelectSingleLanguage});
     } else {
       const languages = result.rows.map((row) => row.name);
       callback(languages);
     }
   });
 }
+
 app.get(languages_route, (req, res) => {
   displayLanguagesFromTable((languages) => {
     res.status(200).json(languages);
