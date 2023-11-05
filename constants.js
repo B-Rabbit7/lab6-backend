@@ -17,6 +17,8 @@ module.exports = {
             deleteRowSuccess: (term) => `Term "${term}" deleted successfully.`,
             createLanguageTable: "CREATE TABLE IF NOT EXISTS language (id SERIAL PRIMARY KEY, name VARCHAR(100))",
             insertLanguage: "INSERT INTO language (name) VALUES ($1)",
+            errorInsertLanguage: (language) => `Error inserting language: ${language}`,
+            successInsertLanguage: (language)=> `Language inserted: ${language}`,
 
         },
     },

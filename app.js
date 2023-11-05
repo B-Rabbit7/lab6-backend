@@ -25,6 +25,8 @@ const deleteSuccess = dbConstants.table.deleteSuccess;
 const insertError = dbConstants.table.insertError;
 const createLanguageTableQuery = dbConstants.table.createLanguageTable;
 const insertLanguageQuery = dbConstants.table.insertLanguage;
+const errorInsertLanguage = dbConstants.table.errorInsertLanguage;
+const successInsertLanguage = dbConstants.table.successInsertLanguage;
 
 const pgError = errorConstants.pgError;
 const cantConnect = errorConstants.cantConnect;
@@ -108,22 +110,14 @@ function createLanguageTable() {
 }
 
 function insertLanguages() {
-  const languages = [
-    "English",
-    "Española",
-    "汉语 (Chinese Simplified)",
-    "Française",
-  ];
-
   const insertSql = insertLanguageQuery;
-  
   availableLanguages.forEach((language) => {
     const values = [language];
     con.query(insertSql, values, (err, result) => {
       if (err) {
-        console.error("Error inserting language:", err);
+        console.error(errorInsertLanguage, err);
       } else {
-        console.log(`Language inserted: ${language}`);
+        console.log(successInsertLanguage(language));
       }
     });
   });
@@ -184,19 +178,23 @@ app.post(create_route, (req, res) => {
       res.status(400).json({ error: exists, request: data });
     } else {
       const insertDataSql = insertSql;
-      con.query(insertDataSql, [term, termLanguage, definition, definitionLanguage], (err, result) => {
-        if (err) {
-          console.error("Error inserting data:", err);
-          res.status(500).json({ error: insertError, request: data });
-        } else {
-          dictionary[term] = definition;
-          res.status(201).json({
-            result: messageConstants.insertResults(data),
-            request: data
-          });
-          displayData();
+      con.query(
+        insertDataSql,
+        [term, termLanguage, definition, definitionLanguage],
+        (err, result) => {
+          if (err) {
+            console.error("Error inserting data:", err);
+            res.status(500).json({ error: insertError, request: data });
+          } else {
+            dictionary[term] = definition;
+            res.status(201).json({
+              result: messageConstants.insertResults(data),
+              request: data,
+            });
+            displayData();
+          }
         }
-      });
+      );
     }
   });
 });
@@ -208,12 +206,22 @@ app.get(routesConstants.mainRoute, (req, res) => {
   con.query(getDefinitionSql, [term], (err, result) => {
     if (err) {
       console.error("Error getting definition:", err);
-      res.status(500).json({ error: errorConstants.dictNotFound(term), request: term });
+      res
+        .status(500)
+        .json({ error: errorConstants.dictNotFound(term), request: term });
     } else if (result.rowCount > 0) {
       const definition = result.rows[0].definition;
-      res.status(200).json({ result: `${term}: ${definition}`, exists: true, request: term });
+      res
+        .status(200)
+        .json({
+          result: `${term}: ${definition}`,
+          exists: true,
+          request: term,
+        });
     } else {
-      res.status(404).json({ error: errorConstants.dictNotFound(term), request: term });
+      res
+        .status(404)
+        .json({ error: errorConstants.dictNotFound(term), request: term });
     }
   });
 });
@@ -225,22 +233,52 @@ app.patch(routesConstants.mainRoute, (req, res) => {
   const newTermLanguague = req.body.termLanguage;
   const newDefinitionLanguage = req.body.definitionLanguage;
 
-  const updateDataSql = "UPDATE dictionary SET definition = $1, term_language = $2, definition_language = $3 WHERE term = $4";
-  con.query(updateDataSql, [newDefinition, newTermLanguague, newDefinitionLanguage, term], (err, result) => {
-    if (err) {
-      console.error("Error updating definition:", err);
-      res.status(500).json({ error: errorConstants.dictNotFound(term), request: { term, newDefinition, newTermLanguague, newDefinitionLanguage } });
-    } else if (result.rowCount > 0) {
-      dictionary[term] = newDefinition;
-      res.status(200).json({
-        result: dbConstants.table.updateSuccess(term, newDefinition),
-        request: { term, newDefinition, newTermLanguague, newDefinitionLanguage }
-      });
-      displayData();
-    } else {
-      res.status(404).json({ error: errorConstants.dictNotFound(term), request: { term, newDefinition, newTermLanguague, newDefinitionLanguage } });
+  const updateDataSql =
+    "UPDATE dictionary SET definition = $1, term_language = $2, definition_language = $3 WHERE term = $4";
+  con.query(
+    updateDataSql,
+    [newDefinition, newTermLanguague, newDefinitionLanguage, term],
+    (err, result) => {
+      if (err) {
+        console.error("Error updating definition:", err);
+        res
+          .status(500)
+          .json({
+            error: errorConstants.dictNotFound(term),
+            request: {
+              term,
+              newDefinition,
+              newTermLanguague,
+              newDefinitionLanguage,
+            },
+          });
+      } else if (result.rowCount > 0) {
+        dictionary[term] = newDefinition;
+        res.status(200).json({
+          result: dbConstants.table.updateSuccess(term, newDefinition),
+          request: {
+            term,
+            newDefinition,
+            newTermLanguague,
+            newDefinitionLanguage,
+          },
+        });
+        displayData();
+      } else {
+        res
+          .status(404)
+          .json({
+            error: errorConstants.dictNotFound(term),
+            request: {
+              term,
+              newDefinition,
+              newTermLanguague,
+              newDefinitionLanguage,
+            },
+          });
+      }
     }
-  });
+  );
 });
 
 app.delete(routesConstants.mainRoute, (req, res) => {
@@ -251,13 +289,22 @@ app.delete(routesConstants.mainRoute, (req, res) => {
   con.query(deleteDataSql, [term], (err, result) => {
     if (err) {
       console.error("Error deleting data:", err);
-      res.status(500).json({ error: errorConstants.dictNotFound(term), request: term });
+      res
+        .status(500)
+        .json({ error: errorConstants.dictNotFound(term), request: term });
     } else if (result.rowCount > 0) {
       delete dictionary[term];
-      res.status(200).json({ result: dbConstants.table.deleteRowSuccess(term), request: term });
+      res
+        .status(200)
+        .json({
+          result: dbConstants.table.deleteRowSuccess(term),
+          request: term,
+        });
       displayData();
     } else {
-      res.status(404).json({ error: errorConstants.dictNotFound(term), request: term });
+      res
+        .status(404)
+        .json({ error: errorConstants.dictNotFound(term), request: term });
     }
   });
 });
