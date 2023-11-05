@@ -24,6 +24,7 @@ const deleteError = dbConstants.table.deleteError;
 const deleteSuccess = dbConstants.table.deleteSuccess;
 const insertError = dbConstants.table.insertError;
 const createLanguageTableQuery = dbConstants.table.createLanguageTable;
+const insertLanguageQuery = dbConstants.table.insertLanguage;
 
 const pgError = errorConstants.pgError;
 const cantConnect = errorConstants.cantConnect;
@@ -114,9 +115,9 @@ function insertLanguages() {
     "Française",
   ];
 
-  const insertSql = "INSERT INTO language (name) VALUES ($1)";
+  const insertSql = insertLanguageQuery;
   
-  languages.forEach((language) => {
+  availableLanguages.forEach((language) => {
     const values = [language];
     con.query(insertSql, values, (err, result) => {
       if (err) {
