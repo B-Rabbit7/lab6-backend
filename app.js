@@ -30,6 +30,9 @@ const successInsertLanguage = dbConstants.table.successInsertLanguage;
 const deleteLanguageQuery = dbConstants.table.deleteLanguageQuery;
 const errorDeleteLanguages = dbConstants.table.errorDeleteLanguages;
 const successDeleteLanguages = dbConstants.table.successDeleteLanguages;
+const displayLanguagesQuery = dbConstants.table.displayLanguagesQuery;
+const errorDisplayLanguage = dbConstants.table.errorDisplayLanguage;
+const successDisplayLanguage = dbConstants.table.successDisplayLanguage;
 
 
 const pgError = errorConstants.pgError;
@@ -139,15 +142,17 @@ function deleteAllLanguages() {
 }
 // deleteAllLanguages();
 deleteAllLanguages();
+
+
 function displayLanguages() {
-  const sql = "SELECT * FROM language";
+  const sql = displayLanguagesQuery;
 
   con.query(sql, (err, result) => {
     if (err) {
-      console.error("Error fetching languages from the language table:", err);
+      console.error(errorDisplayLanguage, err);
       return;
     }
-    console.log("Languages in the 'language' table:");
+    console.log(successDisplayLanguage);
     console.table(result.rows);
   });
 }

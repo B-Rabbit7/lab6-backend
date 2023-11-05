@@ -22,6 +22,9 @@ module.exports = {
             deleteLanguageQuery: "DELETE FROM language",
             errorDeleteLanguages: "Error deleting all languages:",
             successDeleteLanguages: "All rows deleted from the 'languages' table.",
+            displayLanguagesQuery: "SELECT * FROM language",
+            errorDisplayLanguage: "Error fetching languages from the language table:",
+            successDisplayLanguage:"Successfully added Languages to the table. Languages in the 'language' table:" ,
 
 
         },
