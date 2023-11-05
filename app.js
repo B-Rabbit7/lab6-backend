@@ -1,4 +1,4 @@
-const { Pool } = require('pg');
+const { Pool } = require("pg");
 const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
@@ -9,7 +9,7 @@ const dictionary = {};
 const create_route = "/definition";
 const languages_route = "/languages";
 
-const constants = require('./constants'); // Import the constants file
+const constants = require("./constants"); // Import the constants file
 
 const dbConstants = constants.database;
 const errorConstants = constants.errors;
@@ -52,13 +52,13 @@ function connectToDatabase() {
 
   con.on("error", (err, client) => {
     console.error(pgError, err);
-    // Handle the error and attempt to reconnect
     setTimeout(() => {
       connectToDatabase();
-    }, 10000); // Retry the connection after 10 seconds
+    }, 1000);
   });
 
-  con.connect()
+  con
+    .connect()
     .then(() => {
       console.log(connectedMsg);
       createTable();
@@ -112,21 +112,16 @@ app.post(create_route, (req, res) => {
     res.status(400).json({ error: exists });
   } else {
     dictionary[data.term] = data.definition;
-
-    // Insert data into the database
     const values = [
       data.term,
       data.term_language,
       data.definition,
       data.definition_language,
     ];
-
     con.query(insertSql, values, (err, result) => {
       if (err) {
         console.error(insertError, err);
-        res
-          .status(500)
-          .json({ error: insertError });
+        res.status(500).json({ error: insertError });
       } else {
         res.status(201).json({
           result: messageConstants.insertResults(data),
@@ -140,7 +135,9 @@ app.post(create_route, (req, res) => {
 app.get(routesConstants.mainRoute, (req, res) => {
   const term = req.params.word;
   if (term in dictionary) {
-    res.status(200).json({ result: `${term}: ${dictionary[term]}`, exists: true });
+    res
+      .status(200)
+      .json({ result: `${term}: ${dictionary[term]}`, exists: true });
   } else {
     res.status(404).json({ error: errorConstants.dictNotFound(term) });
   }
@@ -154,15 +151,20 @@ app.patch(routesConstants.mainRoute, (req, res) => {
   if (term in dictionary) {
     dictionary[term] = newDefinition;
     const updateSql = dbConstants.table.update;
-    const values = [newDefinition, newTermLanguague, newDefinitionLanguage, term];
+    const values = [
+      newDefinition,
+      newTermLanguague,
+      newDefinitionLanguage,
+      term,
+    ];
 
     con.query(updateSql, values, (err, result) => {
       if (err) {
         console.error(dbConstants.table.updateError, err);
-        res.status(500).json({ error: dbConstants.table.updateError});
+        res.status(500).json({ error: dbConstants.table.updateError });
       } else {
         res.status(200).json({
-          result: dbConstants.table.updateSuccess(term,newDefinition),
+          result: dbConstants.table.updateSuccess(term, newDefinition),
         });
         displayData();
       }
@@ -174,24 +176,23 @@ app.patch(routesConstants.mainRoute, (req, res) => {
 
 app.delete(routesConstants.mainRoute, (req, res) => {
   const term = req.params.word;
-
   if (term in dictionary) {
     delete dictionary[term];
-
     const deleteSql = dbConstants.table.deleteRow;
     const values = [term];
-
     con.query(deleteSql, values, (err, result) => {
       if (err) {
         console.error(dbConstants.table.deleteRowError, err);
         res.status(500).json({ error: dbConstants.table.deleteRowError });
       } else {
-        res.status(200).json({ result: dbConstants.table.deleteRowSuccess(term) });
+        res
+          .status(200)
+          .json({ result: dbConstants.table.deleteRowSuccess(term) });
         displayData();
       }
     });
   } else {
-    res.status(404).json({ error: errorConstants.dictNotFound(term)  });
+    res.status(404).json({ error: errorConstants.dictNotFound(term) });
   }
 });
 
