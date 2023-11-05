@@ -10,8 +10,11 @@ module.exports = {
             deleteSuccess: "All rows deleted from the 'dictionary' table:",
             insertError: (data)=> `Error inserting data into the database: ${data}`,
             update: `UPDATE dictionary SET definition = $1, term_language = $2, definition_language = $3 WHERE term = $4`,
-            updateError: "Error updating data in the database",
-            updateSuccess: (term, newDefinition) => `Term updated:\n"${term} : ${newDefinition}"`,
+            updateError: (term)=>`Error updating the definition of the term: ${term}`,
+            updateSuccess: (term, newDefinition, newTermLanguague, newDefinitionLanguage) => `
+            <span style="color: blue;"><strong>Term updated:</strong></span><br>
+            <span style="color: green;">${term} (<i>${newTermLanguague}</i>)</span> : 
+            <span style="color: purple;">${newDefinition} (<i>${newDefinitionLanguage}</i>)</span>`,
             deleteRow: "DELETE FROM dictionary WHERE term = $1",
             deleteRowError: "Error deleting data from the database. Word does not exist in the database!",
             deleteRowSuccess: (term) => `Term "${term}" deleted successfully.`,

@@ -37,7 +37,8 @@ const checkTermQuery = dbConstants.table.checkTermQuery;
 const errorCheckTerm = dbConstants.table.errorCheckTerm;
 const checkDefinitionQuery = dbConstants.table.checkDefinitionQuery;
 const errorCheckDefinition = dbConstants.table.errorCheckDefinition;
-
+const update = dbConstants.table.update;
+const updateError = dbConstants.table.updateError;
 
 const pgError = errorConstants.pgError;
 const cantConnect = errorConstants.cantConnect;
@@ -246,14 +247,13 @@ app.patch(routesConstants.mainRoute, (req, res) => {
   const newTermLanguague = req.body.termLanguage;
   const newDefinitionLanguage = req.body.definitionLanguage;
 
-  const updateDataSql =
-    "UPDATE dictionary SET definition = $1, term_language = $2, definition_language = $3 WHERE term = $4";
+  const updateDataSql = update;
   con.query(
     updateDataSql,
     [newDefinition, newTermLanguague, newDefinitionLanguage, term],
     (err, result) => {
       if (err) {
-        console.error("Error updating definition:", err);
+        console.error(updateError(term), err);
         res
           .status(500)
           .json({
@@ -268,7 +268,7 @@ app.patch(routesConstants.mainRoute, (req, res) => {
       } else if (result.rowCount > 0) {
         dictionary[term] = newDefinition;
         res.status(200).json({
-          result: dbConstants.table.updateSuccess(term, newDefinition),
+          result: dbConstants.table.updateSuccess(term, newDefinition,newTermLanguague,newDefinitionLanguage),
           request: {
             term,
             newDefinition,
