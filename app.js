@@ -9,7 +9,7 @@ const dictionary = {};
 const create_route = "/definition";
 const languages_route = "/languages";
 
-const constants = require("./constants"); // Import the constants file
+const constants = require("./constants");
 
 const dbConstants = constants.database;
 const errorConstants = constants.errors;
@@ -66,10 +66,9 @@ function connectToDatabase() {
     })
     .catch((err) => {
       console.error(cantConnect, err);
-      // Retry the connection after a delay
       setTimeout(() => {
         connectToDatabase();
-      }, 1000); // Retry the connection after 1 second
+      }, 1000);
     });
 }
 connectToDatabase();
