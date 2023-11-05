@@ -19,6 +19,10 @@ module.exports = {
             insertLanguage: "INSERT INTO language (name) VALUES ($1)",
             errorInsertLanguage: (language) => `Error inserting language: ${language}`,
             successInsertLanguage: (language)=> `Language inserted: ${language}`,
+            deleteLanguageQuery: "DELETE FROM language",
+            errorDeleteLanguages: "Error deleting all languages:",
+            successDeleteLanguages: "All rows deleted from the 'languages' table.",
+
 
         },
     },

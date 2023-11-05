@@ -27,6 +27,10 @@ const createLanguageTableQuery = dbConstants.table.createLanguageTable;
 const insertLanguageQuery = dbConstants.table.insertLanguage;
 const errorInsertLanguage = dbConstants.table.errorInsertLanguage;
 const successInsertLanguage = dbConstants.table.successInsertLanguage;
+const deleteLanguageQuery = dbConstants.table.deleteLanguageQuery;
+const errorDeleteLanguages = dbConstants.table.errorDeleteLanguages;
+const successDeleteLanguages = dbConstants.table.successDeleteLanguages;
+
 
 const pgError = errorConstants.pgError;
 const cantConnect = errorConstants.cantConnect;
@@ -124,13 +128,12 @@ function insertLanguages() {
 }
 
 function deleteAllLanguages() {
-  const deleteSql = "DELETE FROM language";
-
+  const deleteSql = deleteLanguageQuery;
   con.query(deleteSql, (err, result) => {
     if (err) {
-      console.error("Error deleting all languages:", err);
+      console.error(errorDeleteLanguages, err);
     } else {
-      console.log("All rows deleted from the 'languages' table.");
+      console.log(successDeleteLanguages);
     }
   });
 }
