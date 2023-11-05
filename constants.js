@@ -14,7 +14,9 @@ module.exports = {
             updateSuccess: (term, newDefinition) => `Term updated:\n"${term} : ${newDefinition}"`,
             deleteRow: "DELETE FROM dictionary WHERE term = $1",
             deleteRowError: "Error deleting data from the database. Word does not exist in the database!",
-            deleteRowSuccess: (term) => `Term "${term}" deleted successfully.`
+            deleteRowSuccess: (term) => `Term "${term}" deleted successfully.`,
+            createLanguageTable: "CREATE TABLE IF NOT EXISTS language (id SERIAL PRIMARY KEY, name VARCHAR(100))",
+            
         },
     },
     errors: {
