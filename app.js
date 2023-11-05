@@ -6,7 +6,6 @@ const app = express();
 const PORT = process.env.PORT || 8888;
 
 const dictionary = {};
-const main_route = "/definition/:word";
 const create_route = "/definition";
 const languages_route = "/languages";
 
