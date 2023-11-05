@@ -84,7 +84,6 @@ function connectToDatabase() {
     .connect()
     .then(() => {
       console.log(connectedMsg);
-      //add 2 functions 1 create language table, 2 insert data into it
       createTable();
       createLanguageTable();
       insertLanguages();
@@ -151,7 +150,6 @@ function deleteAllLanguages() {
     }
   });
 }
-// deleteAllLanguages();
 deleteAllLanguages();
 
 
