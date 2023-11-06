@@ -274,7 +274,7 @@ app.patch(routesConstants.mainRoute, (req, res) => {
       } else if (result.rowCount > 0) {
         dictionary[term] = newDefinition;
         res.status(200).json({
-          result: dbConstants.table.updateSuccess(term, newDefinition,newTermLanguague,newDefinitionLanguage,200,req.body),
+          result: dbConstants.table.updateSuccess(term, newDefinition,newTermLanguague,newDefinitionLanguage,200,req.body,requestCounter),
           request: {
             term,
             newDefinition,

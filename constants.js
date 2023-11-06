@@ -19,13 +19,15 @@ module.exports = {
         newTermLanguague,
         newDefinitionLanguage,
         statusCode,
-        request
+        request,
+        requestC
       ) => `
             <span style="color: blue;"><strong>Term updated:</strong></span><br>
             <span style="color: green;">${term} (<i>${newTermLanguague}</i>)</span> : 
             <span style="color: purple;">${newDefinition} (<i>${newDefinitionLanguage}</i>)</span>
             <span style="color: blue;"><strong>StatusCode: </strong> ${statusCode}</span><br>
             <span style="color: red;"><strong>Request: </strong> ${JSON.stringify(request)}</span><br>
+            <span style="color: yellow;"><strong>StatusCode: </strong> ${requestC}</span><br>
             `,
       deleteRow: "DELETE FROM dictionary WHERE term = $1",
       deleteRowError:
