@@ -179,6 +179,19 @@ function displayData() {
   });
 }
 
+function getDictionaryEntryCount(callback) {
+  const sql = "SELECT COUNT(*) as count FROM dictionary";
+  con.query(sql, (err, result) => {
+    if (err) {
+      console.error("Error getting dictionary entry count:", err);
+      callback(0);
+    } else {
+      const count = result.rows[0].count;
+      callback(count);
+    }
+  });
+}
+
 app.post(create_route, (req, res) => {
   requestCounter++;
   let data = req.body;
@@ -205,11 +218,14 @@ app.post(create_route, (req, res) => {
             res.status(500).json({ error: insertError(data), request: data, statusCode: 500, requestCounter });
           } else {
             dictionary[term] = definition;
-            res.status(201).json({
-              result: messageConstants.insertResults(data,201,requestCounter,req.body),
-              request: data,
-              statusCode: 201,
-              requestCounter,
+            getDictionaryEntryCount((count) => {
+              res.status(201).json({
+                result: messageConstants.insertResults(data, 201, requestCounter, req.body,count),
+                request: data,
+                statusCode: 201,
+                requestCounter,
+                entryCount: count,
+              });
             });
             displayData();
           }
@@ -225,23 +241,29 @@ app.get(routesConstants.mainRoute, (req, res) => {
   const getDefinitionSql = checkDefinitionQuery;
   con.query(getDefinitionSql, [term], (err, result) => {
     if (err) {
-      console.error(errorCheckDefinition, err);
+      console.error(errorCheckDefinition(term), err);
       res
         .status(500)
         .json({ error: errorConstants.dictNotFound(term,500,requestCounter,req.params), request: term });
     } else if (result.rowCount > 0) {
       const { definition, term_language, definition_language } = result.rows[0];
-      res
-        .status(200)
-        .json({
-          result: getResults(term,definition,term_language,definition_language,200,req.params,requestCounter),
-          exists: true,
-          request: term,
-        });
-    } else {
-      res
-        .status(404)
-        .json({ error: errorConstants.dictNotFound(term,404,requestCounter,req.body), request: term });
+      getDictionaryEntryCount((count) => {
+        res
+          .status(200)
+          .json({
+            result: getResults(term, definition, term_language, definition_language, 200, req.params, requestCounter,count),
+            exists: true,
+            request: term,
+            entryCount: count,
+          });
+      });
+    } else {;
+      getDictionaryEntryCount((count) => {
+        res
+          .status(404)
+          .json({
+            error: errorConstants.dictNotFound(term,404,requestCounter,req.params,count), request: term });
+      });
     }
   });
 });
@@ -273,28 +295,33 @@ app.patch(routesConstants.mainRoute, (req, res) => {
           });
       } else if (result.rowCount > 0) {
         dictionary[term] = newDefinition;
-        res.status(200).json({
-          result: dbConstants.table.updateSuccess(term, newDefinition,newTermLanguague,newDefinitionLanguage,200,req.body,requestCounter),
-          request: {
-            term,
-            newDefinition,
-            newTermLanguague,
-            newDefinitionLanguage,
-          },
-        });
-        displayData();
-      } else {
-        res
-          .status(404)
-          .json({
-            error: errorConstants.dictNotFound(term,404,requestCounter,req.body),
+        getDictionaryEntryCount((count) => {
+          res.status(200).json({
+            result: dbConstants.table.updateSuccess(term, newDefinition, newTermLanguague, newDefinitionLanguage, 200, req.body, requestCounter,count),
             request: {
               term,
               newDefinition,
               newTermLanguague,
               newDefinitionLanguage,
             },
+            entryCount: count,
           });
+          displayData();
+        });
+      } else {
+        getDictionaryEntryCount((count) => {
+          res.status(404).json({
+            error: errorConstants.dictNotFound(term,404,requestCounter,req.body,count),
+            request: {
+              term,
+              newDefinition,
+              newTermLanguague,
+              newDefinitionLanguage,
+            },
+            entryCount: count,
+          });
+          displayData();
+        });
       }
     }
   );
@@ -313,17 +340,27 @@ app.delete(routesConstants.mainRoute, (req, res) => {
         .json({ error: errorConstants.dictNotFound(term,400,requestCounter,req.params), request: term });
     } else if (result.rowCount > 0) {
       delete dictionary[term];
-      res
-        .status(200)
-        .json({
-          result: deleteRowSuccess(term,200,req.params,requestCounter),
-          request: term,
-        });
-      displayData();
+      getDictionaryEntryCount((count) => {
+        res
+          .status(200)
+          .json({
+            result: deleteRowSuccess(term, 200, req.params, requestCounter,count),
+            request: term,
+            entryCount: count,
+          });
+        displayData();
+      });
     } else {
-      res
-        .status(404)
-        .json({ error: errorConstants.dictNotFound(term,404,requestCounter,req.params), request: term });
+      getDictionaryEntryCount((count) => {
+        res
+          .status(404)
+          .json({
+            error: errorConstants.dictNotFound(term, 404, requestCounter, req.params,count),
+            request: term,
+            entryCount: count,
+          });
+        displayData();
+      });
     }
   });
 });

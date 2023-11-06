@@ -20,19 +20,21 @@ module.exports = {
         newDefinitionLanguage,
         statusCode,
         request,
-        requestC
+        requestC,
+        entries
       ) => `
             <span style="color: blue;"><strong>Term updated:</strong></span><br>
             <span style="color: green;">${term} (<i>${newTermLanguague}</i>)</span> : 
             <span style="color: purple;">${newDefinition} (<i>${newDefinitionLanguage}</i>)</span>
             <span style="color: blue;"><strong>StatusCode: </strong> ${statusCode}</span><br>
             <span style="color: red;"><strong>Request: </strong> ${JSON.stringify(request)}</span><br>
-            <span style="color: yellow;"><strong>StatusCode: </strong> ${requestC}</span><br>
+            <span style="color: yellow;"><strong>Request Counter: </strong> ${requestC}</span><br>
+            <span style="color: green;"><strong>Entries: </strong> ${entries}</span><br>
             `,
       deleteRow: "DELETE FROM dictionary WHERE term = $1",
       deleteRowError:
         "Error deleting data from the database. Word does not exist in the database!",
-      deleteRowSuccess: (term,statusCode,request,requestC) => `Term "${term}" deleted successfully.<br>
+      deleteRowSuccess: (term,statusCode,request,requestC,entries) => `Term "${term}" deleted successfully.<br>
       <div>
         <strong>Status Code:</strong> ${statusCode}
       </div>
@@ -41,7 +43,11 @@ module.exports = {
       </div>
       <div>
         <strong>Original Request: </strong> ${JSON.stringify(request)}
-      </div>`,
+      </div>
+      <div>
+        <strong>Entries: </strong> ${entries}
+      </div>
+      `,
       createLanguageTable:
         "CREATE TABLE IF NOT EXISTS language (id SERIAL PRIMARY KEY, name VARCHAR(100))",
       insertLanguage: "INSERT INTO language (name) VALUES ($1)",
@@ -71,7 +77,7 @@ module.exports = {
     cantConnect: "Error connecting:",
     fetchError: "Error fetching data:",
     exists: (term) => `Warning, term ${term} already exists`,
-    dictNotFound: (term,statusCode,requestC,request) => `Term "${term}" not found in the database <br>
+    dictNotFound: (term,statusCode,requestC,request,entries) => `Term "${term}" not found in the database <br>
     <div>
     <strong>Status Code:</strong> ${statusCode}
   </div>
@@ -80,12 +86,16 @@ module.exports = {
   </div>
   <div>
     <strong>Original Request: </strong> ${JSON.stringify(request)}
-  </div>`,
+  </div>
+  <div>
+    <strong>Entries: </strong> ${entries}
+  </div>
+  `,
   },
   messages: {
     connected: "Connected to PostgreSQL!",
     allDataDisplayed: 'Data from the "dictionary" table:',
-    insertResults: (data,statusCode,requestC,request) => `
+    insertResults: (data,statusCode,requestC,request,entries) => `
       <div>
         <strong style="color: #0074D9;">New entry recorded:</strong>
       </div>
@@ -108,11 +118,15 @@ module.exports = {
         <strong>Request Counter: </strong> ${requestC}
       </div>
       <div>
+        <strong>Number of Entries: </strong> ${entries}
+      </div>
+      <div>
         <strong>Original Request: </strong> ${JSON.stringify(request)}
       </div>
+      
     `,
     serverUp: (port) => `Server is running on port ${port}`,
-    getResults: (term, definition, term_language, definition_language,statusCode,request,requestC) => `
+    getResults: (term, definition, term_language, definition_language,statusCode,request,requestC,entries) => `
         <span style="color: blue;"><strong>${term}:</strong></span> 
         <span style="color: green;">${definition}</span><br>
         <span style="color: blue;"><strong>Term Language:</strong></span> 
@@ -124,7 +138,9 @@ module.exports = {
         <span style="color: black;"><strong>Request:</strong></span>
         <span style="color: pink;"> ${JSON.stringify(request)}</span>
         <span style="color: black;"><strong>Request Counter:</strong></span>
-        <span style="color: red;"> ${requestC}</span>`,
+        <span style="color: red;"> ${requestC}</span><br>
+        <span style="color: black;"><strong>Entries:</strong></span>
+        <span style="color: red;"> ${entries}</span>`,
   },
   languages: ["English", "Española", "汉语 (Chinese Simplified)", "Française"],
   routes: {
