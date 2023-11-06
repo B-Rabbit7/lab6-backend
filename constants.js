@@ -17,15 +17,29 @@ module.exports = {
         term,
         newDefinition,
         newTermLanguague,
-        newDefinitionLanguage
+        newDefinitionLanguage,
+        statusCode,
+        request
       ) => `
             <span style="color: blue;"><strong>Term updated:</strong></span><br>
             <span style="color: green;">${term} (<i>${newTermLanguague}</i>)</span> : 
-            <span style="color: purple;">${newDefinition} (<i>${newDefinitionLanguage}</i>)</span>`,
+            <span style="color: purple;">${newDefinition} (<i>${newDefinitionLanguage}</i>)</span>
+            <span style="color: blue;"><strong>StatusCode: </strong> ${statusCode}</span><br>
+            <span style="color: red;"><strong>Request: </strong> ${JSON.stringify(request)}</span><br>
+            `,
       deleteRow: "DELETE FROM dictionary WHERE term = $1",
       deleteRowError:
         "Error deleting data from the database. Word does not exist in the database!",
-      deleteRowSuccess: (term) => `Term "${term}" deleted successfully.`,
+      deleteRowSuccess: (term,statusCode,request,requestC) => `Term "${term}" deleted successfully.<br>
+      <div>
+        <strong>Status Code:</strong> ${statusCode}
+      </div>
+      <div>
+        <strong>Request Counter: </strong> ${requestC}
+      </div>
+      <div>
+        <strong>Original Request: </strong> ${JSON.stringify(request)}
+      </div>`,
       createLanguageTable:
         "CREATE TABLE IF NOT EXISTS language (id SERIAL PRIMARY KEY, name VARCHAR(100))",
       insertLanguage: "INSERT INTO language (name) VALUES ($1)",
@@ -55,12 +69,21 @@ module.exports = {
     cantConnect: "Error connecting:",
     fetchError: "Error fetching data:",
     exists: (term) => `Warning, term ${term} already exists`,
-    dictNotFound: (term) => `Term "${term}" not found in the database`,
+    dictNotFound: (term,statusCode,requestC,request) => `Term "${term}" not found in the database <br>
+    <div>
+    <strong>Status Code:</strong> ${statusCode}
+  </div>
+  <div>
+    <strong>Request Counter: </strong> ${requestC}
+  </div>
+  <div>
+    <strong>Original Request: </strong> ${JSON.stringify(request)}
+  </div>`,
   },
   messages: {
     connected: "Connected to PostgreSQL!",
     allDataDisplayed: 'Data from the "dictionary" table:',
-    insertResults: (data) => `
+    insertResults: (data,statusCode,requestC,request) => `
       <div>
         <strong style="color: #0074D9;">New entry recorded:</strong>
       </div>
@@ -76,15 +99,30 @@ module.exports = {
       <div>
         <strong>Definition Language:</strong> ${data.definition_language}
       </div>
+      <div>
+        <strong>Status Code:</strong> ${statusCode}
+      </div>
+      <div>
+        <strong>Request Counter: </strong> ${requestC}
+      </div>
+      <div>
+        <strong>Original Request: </strong> ${JSON.stringify(request)}
+      </div>
     `,
     serverUp: (port) => `Server is running on port ${port}`,
-    getResults: (term, definition, term_language, definition_language) => `
+    getResults: (term, definition, term_language, definition_language,statusCode,request,requestC) => `
         <span style="color: blue;"><strong>${term}:</strong></span> 
         <span style="color: green;">${definition}</span><br>
         <span style="color: blue;"><strong>Term Language:</strong></span> 
         <span style="color: red;">${term_language}</span><br>
         <span style="color: blue;"><strong>Definition Language:</strong></span> 
-        <span style="color: purple;">${definition_language}</span>`,
+        <span style="color: purple;">${definition_language}</span><br>
+        <span style="color: black;"><strong>StatusCode:</strong></span>
+        <span style="color: pink;">${statusCode}</span>
+        <span style="color: black;"><strong>Request:</strong></span>
+        <span style="color: pink;"> ${JSON.stringify(request)}</span>
+        <span style="color: black;"><strong>Request Counter:</strong></span>
+        <span style="color: red;"> ${requestC}</span>`,
   },
   languages: ["English", "Española", "汉语 (Chinese Simplified)", "Française"],
   routes: {
